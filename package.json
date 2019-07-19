@@ -2,7 +2,7 @@
   "name": "btc-txs",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/server.js",
   "scripts": {
     "start": "nodemon --exec babel-node --max-old-space-size=18192 src/server.js",
     "build": "babel src --out-dir dist",
