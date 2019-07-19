@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon --exec babel-node --max-old-space-size=18192 src/server.js",
     "build": "babel src --out-dir dist",
-    "serve": "node dist/server.js",
+    "serve": "babel-node dist/server.js",
     "test": "nodemon --exec babel-node --max-old-space-size=8192 src/test.js"
   },
   "repository": {
