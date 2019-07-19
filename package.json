@@ -1,0 +1,35 @@
+{
+  "name": "btc-txs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --exec babel-node --max-old-space-size=18192 src/server.js",
+    "build": "babel src --out-dir dist",
+    "serve": "node dist/server.js",
+    "test": "nodemon --exec babel-node --max-old-space-size=8192 src/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pthor11/btc-txs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pthor11/btc-txs/issues"
+  },
+  "homepage": "https://github.com/pthor11/btc-txs#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/node": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "nodemon": "^1.19.1"
+  },
+  "dependencies": {
+    "axios": "^0.19.0",
+    "dotenv": "^8.0.0",
+    "mongoose": "^5.6.5"
+  }
+}
