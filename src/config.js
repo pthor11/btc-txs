@@ -8,8 +8,7 @@ const mongo = {
     url: process.env.MONGO_URL,
     port: process.env.MONGO_URL,
     db_auth: process.env.MONGO_DB_AUTH,
-    db_full_txs: process.env.MONGO_DB_FULL_TXS,
-    db_short_txs: process.env.MONGO_DB_SHORT_TXS
+    db_name: process.env.MONGO_DB_NAME,
 }
 
 const rpc = {

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import {rpc} from '../config'
+import {rpc} from './config'
 
 const call = (method, params) => {
     const data = JSON.stringify({

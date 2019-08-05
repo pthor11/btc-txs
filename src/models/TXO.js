@@ -1,7 +1,7 @@
 import mongoose from '../mongoose'
 
 const ShortTXSchema = new mongoose.Schema({
-    spent: {type: String, default: null},
+    spent: {type: String, index: true, default: null},
     txid: { type: String, required: true, index: true },
     height: { type: Number, required: true, index: true },
     time: { type: Number, required: true, index: true },
@@ -13,4 +13,4 @@ const ShortTXSchema = new mongoose.Schema({
 
 ShortTXSchema.index({ txid: 1, n: 1 }, {unique: true})
 
-export default mongoose.short_txs_conn.model('ShortTX', ShortTXSchema, 'btc')
+export default mongoose.wallet_txs_conn.model('TX', ShortTXSchema, 'btc')
