@@ -13,9 +13,9 @@ const mongo = {
 
 const rpc = {
     url: process.env.BTC_NODE_URL,
-    port: process.env.BTC_NODE_PORT,
     username: process.env.BTC_NODE_USERNAME,
     password: process.env.BTC_NODE_PASSWORD,
+    auth: 'Basic c2lsb3RlY2g6YWJjMTIz'
 }
 
 export  {

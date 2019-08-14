@@ -70,7 +70,7 @@ const run = async (blockHeight) => {
         run(block.height + 1)
 
     } catch (err) {
-        console.log(err)
+        console.log(err.response)
         setTimeout(start, 1000)
     }
 

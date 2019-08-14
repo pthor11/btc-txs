@@ -10,7 +10,7 @@ const call = (method, params) => {
     })
 
     return axios({
-        url: `http://${rpc.url}:${rpc.port}`,
+        url: rpc.url,
         auth: {
             username: rpc.username,
             password: rpc.password,
