@@ -13,7 +13,7 @@ const run = async (blockHeight) => {
         const block = block_response.data.result
 
         if (!block) {
-            console.log(`btc-txs is up to date`)
+            console.log(`get block height ${blockHeight} failed`)
             setTimeout(start, 1000)
             return Promise.resolve(true)
         }
@@ -69,8 +69,12 @@ const run = async (blockHeight) => {
 
         run(block.height + 1)
 
-    } catch (err) {
-        console.log(err.response)
+    } catch (error) {
+        if (error.response.data.error.code === -1) {
+            console.log(`btc-txs is up to date`)
+        } else {
+            console.log(error.response.data)
+        }
         setTimeout(start, 1000)
     }
 
