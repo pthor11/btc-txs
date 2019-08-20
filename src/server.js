@@ -34,9 +34,11 @@ const run = async (blockHeight) => {
             const decodetx_response = await rpc('decoderawtransaction', [rawtx])
             const decodetx = decodetx_response.data.result
 
-            for (const input of decodetx.vin) {
-                await TXO.findOneAndUpdate({ $and: [{ txid: input.txid }, { n: input.vout }] }, { $set: { spent: decodetx.txid } })
-            }
+            // for (const input of decodetx.vin) {
+            //     await TXO.findOneAndUpdate({ $and: [{ txid: input.txid }, { n: input.vout }] }, { $set: { spent: decodetx.txid } })
+            // }
+
+            await Promise.all(decodetx.vin.map(input => TXO.findOneAndUpdate({ $and: [{ txid: input.txid }, { n: input.vout }] }, { $set: { spent: decodetx.txid } })))
 
             for (const output of decodetx.vout) {
                 const value = output.value
@@ -46,19 +48,21 @@ const run = async (blockHeight) => {
                 if ((value && type && addresses) && type !== "nonstandard") {
                     const found = await TXO.findOne({txid: decodetx.txid, n})
                     
-                    if (!found) {
-                        const unspentTXO = new TXO({
-                            txid: decodetx.txid,
-                            height: block.height,
-                            time: block.time,
-                            value,
-                            n,
-                            type,
-                            addresses
-                        })
-                        unspentTXOs.push(unspentTXO)
-                    }
+                    // if (!found) {
+                        
+                    // }
                     
+                    const unspentTXO = new TXO({
+                        txid: decodetx.txid,
+                        height: block.height,
+                        time: block.time,
+                        value,
+                        n,
+                        type,
+                        addresses
+                    })
+                    unspentTXOs.push(unspentTXO)
+
                 }
             }
         }
