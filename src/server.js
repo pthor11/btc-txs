@@ -32,71 +32,81 @@ const getTX = async (txid, block) => {
         }
         return Promise.resolve(unspentTXOs)
     } catch (error) {
-        console.log(error)
+        console.log(error.response.data)
         return Promise.resolve(null)
     }
 }
 
-    const run = async (blockHeight) => {
-        try {
+function chunkArrayInGroups(arr, size) {
+    var myArray = [];
+    for(var i = 0; i < arr.length; i += size) {
+      myArray.push(arr.slice(i, i+size));
+    }
+    return myArray;
+  }
 
-            const blockhash_response = await rpc('getblockhash', [blockHeight])
+const run = async (blockHeight) => {
+    try {
 
-            const blockhash = blockhash_response.data.result
+        const blockhash_response = await rpc('getblockhash', [blockHeight])
 
-            const block_response = await rpc('getblock', [blockhash])
+        const blockhash = blockhash_response.data.result
 
-            const block = block_response.data.result
+        const block_response = await rpc('getblock', [blockhash])
 
-            if (!block) {
-                console.log(`get block height ${blockHeight} failed`)
-                setTimeout(start, 1000)
-                return Promise.resolve(true)
-            }
+        const block = block_response.data.result
 
-            const unspentTXOs_array = await Promise.all(block.tx.map(txid => getTX(txid, block)))
-            const unspentTXOs = unspentTXOs_array.filter(array => array !== null).reduce((unspentTXOs, array) => {
-                unspentTXOs = [...unspentTXOs, ...array]
-                return unspentTXOs
-            }, [])
-
-            await TXO.insertMany(unspentTXOs)
-
-            console.log(`block ${block.height} get ${block.tx.length} txs`)
-
-            run(block.height + 1)
-
-        } catch (error) {
-            if (error.response.data.error.code === -1) {
-                console.log(`btc-txs is up to date`)
-            } else {
-                console.log(error.response.data)
-            }
+        if (!block) {
+            console.log(`get block height ${blockHeight} failed`)
             setTimeout(start, 1000)
+            return Promise.resolve(true)
         }
 
-    }
+        const unspentTXOs_array = await Promise.all(block.tx.map(txid => getTX(txid, block)))
+        const unspentTXOs = unspentTXOs_array.filter(array => array !== null).reduce((unspentTXOs, array) => {
+            unspentTXOs = [...unspentTXOs, ...array]
+            return unspentTXOs
+        }, [])
 
-    const rollback = async () => {
-        const lastTX = await TXO.findOne({}, { _id: 0, height: 1 }).sort({ height: -1 })
-        if (lastTX) {
-            await TXO.deleteMany({ height: lastTX.height })
-            return Promise.resolve(lastTX.height)
+        const groupUTXOs = chunkArrayInGroups(unspentTXOs, 500)
+
+        await Promise.all(groupUTXOs.map(group => TXO.insertMany(group)))
+
+        console.log(`block ${block.height} get ${block.tx.length} txs`)
+
+        run(block.height + 1)
+
+    } catch (error) {
+        if (error.response.data.error.code === -1) {
+            console.log(`btc-txs is up to date`)
         } else {
-            return Promise.resolve(1)
+            console.log(error.response)
         }
+        setTimeout(start, 1000)
     }
 
-    const start = async () => {
-        try {
-            const blockHeight = await rollback()
-            console.log(`rollback from block ${blockHeight}`)
+}
 
-            await run(blockHeight)
-        } catch (error) {
-            console.log(error)
-            start()
-        }
+const rollback = async () => {
+    const lastTX = await TXO.findOne({}, { _id: 0, height: 1 }).sort({ height: -1 })
+    if (lastTX) {
+        await TXO.deleteMany({ height: lastTX.height })
+        return Promise.resolve(lastTX.height)
+    } else {
+        return Promise.resolve(1)
     }
+}
 
-    start()
+const start = async () => {
+    try {
+        const blockHeight = await rollback()
+        console.log(`rollback from block ${blockHeight}`)
+
+        await run(blockHeight)
+    } catch (error) {
+        console.log(error)
+        start()
+    }
+}
+
+start()
