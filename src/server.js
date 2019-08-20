@@ -1,6 +1,8 @@
 import rpc from './rpc'
 import TXO from './models/TXO'
 
+const LIMIT = 900
+
 const getTX = async (txid, block) => {
     try {
         const rawtx_response = await rpc('getrawtransaction', [txid])
@@ -62,7 +64,7 @@ const run = async (blockHeight) => {
             return Promise.resolve(true)
         }
 
-        const unspentTXOs_groups = chunkArrayInGroups(block.tx, 500)
+        const unspentTXOs_groups = chunkArrayInGroups(block.tx, LIMIT)
 
         // console.log({unspentTXOs_groups})
 
