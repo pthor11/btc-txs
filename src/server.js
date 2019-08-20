@@ -32,18 +32,18 @@ const getTX = async (txid, block) => {
         }
         return Promise.resolve(unspentTXOs)
     } catch (error) {
-        console.log(error.response.data)
+        console.log(error.response)
         return Promise.resolve(null)
     }
 }
 
 function chunkArrayInGroups(arr, size) {
     var myArray = [];
-    for(var i = 0; i < arr.length; i += size) {
-      myArray.push(arr.slice(i, i+size));
+    for (var i = 0; i < arr.length; i += size) {
+        myArray.push(arr.slice(i, i + size));
     }
     return myArray;
-  }
+}
 
 const run = async (blockHeight) => {
     try {
@@ -62,17 +62,32 @@ const run = async (blockHeight) => {
             return Promise.resolve(true)
         }
 
-        const unspentTXOs_array = await Promise.all(block.tx.map(txid => getTX(txid, block)))
-        const unspentTXOs = unspentTXOs_array.filter(array => array !== null).reduce((unspentTXOs, array) => {
-            unspentTXOs = [...unspentTXOs, ...array]
-            return unspentTXOs
-        }, [])
+        const unspentTXOs_groups = chunkArrayInGroups(block.tx, 500)
 
-        const groupUTXOs = chunkArrayInGroups(unspentTXOs, 500)
+        // console.log({unspentTXOs_groups})
 
-        await Promise.all(groupUTXOs.map(group => TXO.insertMany(group)))
+        let total_utxos = []
 
-        console.log(`block ${block.height} get ${block.tx.length} txs`)
+        for (const group of unspentTXOs_groups) {
+            console.log({ group: group.length })
+
+            const unspentTXOs_array = await Promise.all(group.map(txid => getTX(txid, block)))
+
+            const unspentTXOs = unspentTXOs_array.filter(array => (array !== null) || (array !== undefined)).reduce((unspentTXOs, arr) => {
+                unspentTXOs = [...unspentTXOs, ...arr]
+                return unspentTXOs
+            }, [])
+
+            // console.log({unspentTXOs});
+            
+            total_utxos = [...total_utxos, ...unspentTXOs]            
+        }
+
+        // console.log({total_utxos});
+
+        await TXO.insertMany(total_utxos)
+        
+        console.log(`block ${block.height} get ${block.tx.length} txs ${total_utxos.length} utxos`)
 
         run(block.height + 1)
 
